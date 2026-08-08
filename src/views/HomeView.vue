@@ -1,83 +1,108 @@
 <template>
   <div>
-    <p v-if="store.error" class="error-message">{{ store.error }}</p>
-
-    <TaskForm
-      :editing-task="editingTask"
-      @add="handleAdd"
-      @update="handleUpdate"
-      @cancel="handleCancel"
-    />
+    <p v-if="store.error" class="error-message">
+      {{ store.error }}
+      <button type="button" class="retry-button" @click="store.fetchTasks()">
+        Tentar novamente
+      </button>
+    </p>
 
     <p v-if="store.loading" class="loading-message">Carregando tarefas...</p>
 
     <template v-else>
-      <section v-if="store.pendingTasks.length > 0">
+      <input
+        v-model="store.filterText"
+        type="search"
+        class="search-input"
+        placeholder="Buscar tarefas..."
+      />
+
+      <section v-if="store.filteredPendingTasks.length > 0">
         <h2 class="section-title">
-          Pendentes ({{ store.pendingTasks.length }})
+          Pendentes ({{ store.filteredPendingTasks.length }})
         </h2>
-        <TaskItem
-          v-for="task in store.pendingTasks"
-          :key="task.id"
-          :task="task"
-          @toggle="handleToggle"
-          @remove="handleRemove"
-          @edit="handleEdit"
-        />
+        <div
+          v-for="group in store.pendingGroups"
+          :key="group.priority"
+          class="priority-group"
+        >
+          <h3 class="group-title">
+            {{ group.label }} ({{ group.tasks.length }})
+          </h3>
+          <TaskItem
+            v-for="task in group.tasks"
+            :key="task.id"
+            :task="task"
+            @toggle="handleToggle"
+            @remove="handleRemove"
+            @edit="handleEdit"
+          />
+        </div>
       </section>
 
-      <section v-if="store.completedTasks.length > 0">
+      <section v-if="store.filteredCompletedTasks.length > 0">
         <h2 class="section-title">
-          Concluídas ({{ store.completedTasks.length }})
+          Concluídas ({{ store.filteredCompletedTasks.length }})
         </h2>
-        <TaskItem
-          v-for="task in store.completedTasks"
-          :key="task.id"
-          :task="task"
-          @toggle="handleToggle"
-          @remove="handleRemove"
-          @edit="handleEdit"
-        />
+        <div
+          v-for="group in store.completedGroups"
+          :key="group.priority"
+          class="priority-group"
+        >
+          <h3 class="group-title">
+            {{ group.label }} ({{ group.tasks.length }})
+          </h3>
+          <TaskItem
+            v-for="task in group.tasks"
+            :key="task.id"
+            :task="task"
+            @toggle="handleToggle"
+            @remove="handleRemove"
+            @edit="handleEdit"
+          />
+        </div>
       </section>
 
       <p v-if="store.tasks.length === 0" class="empty-message">
-        Nenhuma tarefa cadastrada. Adicione uma acima.
+        Nenhuma tarefa cadastrada. Toque no botão + para adicionar.
+      </p>
+      <p
+        v-else-if="store.tasks.length > 0 && store.filteredTasks.length === 0"
+        class="empty-message"
+      >
+        Nenhuma tarefa corresponde a "{{ store.filterText }}".
       </p>
     </template>
 
     <InstallButton />
+    <button
+      type="button"
+      class="fab"
+      aria-label="Adicionar atividade"
+      title="Adicionar atividade"
+      @click="router.push({ name: 'task-add' })"
+    >
+      +
+    </button>
   </div>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-import TaskForm from '../components/TaskForm.vue';
+import { onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import TaskItem from '../components/TaskItem.vue';
 import InstallButton from '../components/InstallButton.vue';
 import { useTasksStore } from '../stores/tasks.js';
 
 const store = useTasksStore();
-const editingTask = ref(null);
+const router = useRouter();
 
 onMounted(() => {
   store.fetchTasks();
 });
 
-function handleAdd(payload) {
-  store.addTask(payload);
-}
-
-function handleUpdate(id, payload) {
-  store.updateTask(id, payload);
-  editingTask.value = null;
-}
-
-function handleCancel() {
-  editingTask.value = null;
-}
-
 function handleEdit(task) {
-  editingTask.value = task;
+  router.push({ name: 'task-edit', params: { id: task.id } });
 }
 
 function handleToggle(id) {
@@ -85,7 +110,6 @@ function handleToggle(id) {
 }
 
 function handleRemove(id) {
-  if (editingTask.value?.id === id) editingTask.value = null;
   store.removeTask(id);
 }
 </script>
@@ -96,6 +120,18 @@ function handleRemove(id) {
   color: #666;
   margin-bottom: 12px;
   margin-top: 20px;
+}
+
+.priority-group {
+  margin-bottom: 16px;
+}
+
+.group-title {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #888;
+  margin-bottom: 8px;
 }
 
 .empty-message {
@@ -115,9 +151,58 @@ function handleRemove(id) {
   font-size: 0.9rem;
 }
 
+.search-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  margin-bottom: 8px;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: #4a90d9;
+}
+
 .loading-message {
   color: #666;
   font-size: 0.9rem;
   padding: 8px 0;
+}
+
+.fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
+  background-color: #4a90d9;
+  color: white;
+  font-size: 2rem;
+  line-height: 1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  z-index: 10;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.fab:hover {
+  background-color: #357abd;
+  transform: scale(1.05);
+}
+
+.retry-button {
+  margin-left: 8px;
+  padding: 4px 10px;
+  background-color: #4a90d9;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
 }
 </style>
