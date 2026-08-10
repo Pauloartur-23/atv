@@ -5,7 +5,10 @@
       :src="task.img_url"
       class="task-thumbnail"
       alt="Imagem da tarefa"
+      title="Ver imagem"
+      @click="openDialog"
     />
+
     <label class="task-label">
       <input
         type="checkbox"
@@ -13,18 +16,43 @@
         @change="$emit('toggle', task.id)"
       />
       <span class="task-title">{{ task.title }}</span>
+      <span
+        v-if="task.priority && task.priority !== 'normal'"
+        class="priority-badge"
+        :class="`priority-${task.priority}`"
+      >
+        {{ priorityLabel }}
+      </span>
+      <span
+        v-if="task.latitude != null && task.longitude != null"
+        class="task-coordinates"
+      >
+        📍 {{ task.latitude.toFixed(4) }}, {{ task.longitude.toFixed(4) }}
+      </span>
     </label>
+
     <div class="task-actions">
       <button class="task-edit" @click="$emit('edit', task)">Editar</button>
       <button class="task-remove" @click="$emit('remove', task.id)">
         Remover
       </button>
     </div>
+
+    <dialog ref="dialogRef" class="photo-dialog">
+      <div class="photo-dialog-content">
+        <img :src="task.img_url" alt="Imagem da tarefa" />
+        <button type="button" class="photo-dialog-close" @click="closeDialog">
+          Fechar
+        </button>
+      </div>
+    </dialog>
   </div>
 </template>
 
 <script setup>
-defineProps({
+import { computed, ref } from 'vue';
+
+const props = defineProps({
   task: {
     type: Object,
     required: true,
@@ -32,6 +60,21 @@ defineProps({
 });
 
 defineEmits(['toggle', 'remove', 'edit']);
+
+const dialogRef = ref(null);
+
+const priorityLabel = computed(() => {
+  const labels = { baixa: 'Baixa', alta: 'Alta' };
+  return labels[props.task.priority] ?? props.task.priority;
+});
+
+function openDialog() {
+  dialogRef.value?.showModal();
+}
+
+function closeDialog() {
+  dialogRef.value?.close();
+}
 </script>
 
 <style scoped>
@@ -53,8 +96,15 @@ defineEmits(['toggle', 'remove', 'edit']);
   height: 44px;
   object-fit: cover;
   border-radius: 6px;
-  border: 1px solid #eee;
+  border: 1px solid #e0e0e0;
+  cursor: pointer;
   flex-shrink: 0;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.task-thumbnail:hover {
+  transform: scale(1.05);
+  border-color: #4a90d9;
 }
 
 .task-item.done {
@@ -67,6 +117,7 @@ defineEmits(['toggle', 'remove', 'edit']);
   gap: 12px;
   cursor: pointer;
   flex: 1;
+  flex-wrap: wrap;
 }
 
 .task-label input[type='checkbox'] {
@@ -82,6 +133,30 @@ defineEmits(['toggle', 'remove', 'edit']);
 .task-item.done .task-title {
   text-decoration: line-through;
   color: #999;
+}
+
+.priority-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.priority-alta {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.priority-baixa {
+  background: #eafaf1;
+  color: #27ae60;
+}
+
+.task-coordinates {
+  font-size: 0.7rem;
+  color: #999;
+  flex-basis: 100%;
 }
 
 .task-remove {
@@ -114,5 +189,41 @@ defineEmits(['toggle', 'remove', 'edit']);
 
 .task-edit:hover {
   text-decoration: underline;
+}
+
+.photo-dialog {
+  border: none;
+  border-radius: 12px;
+  padding: 0;
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+.photo-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.photo-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+}
+
+.photo-dialog-content img {
+  max-width: min(80vw, 360px);
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.photo-dialog-close {
+  padding: 8px 16px;
+  background: #4a90d9;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
 }
 </style>

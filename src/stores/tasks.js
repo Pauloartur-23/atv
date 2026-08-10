@@ -6,9 +6,49 @@ export const useTasksStore = defineStore('tasks', () => {
   const tasks = ref([]);
   const loading = ref(false);
   const error = ref(null);
+  const filterText = ref('');
 
   const pendingTasks = computed(() => tasks.value.filter((t) => !t.done));
   const completedTasks = computed(() => tasks.value.filter((t) => t.done));
+
+  const priorityOrder = ['alta', 'normal', 'baixa'];
+  const priorityLabels = { alta: 'Alta', normal: 'Normal', baixa: 'Baixa' };
+
+  const filteredTasks = computed(() => {
+    const term = filterText.value.trim().toLowerCase();
+    if (!term) return tasks.value;
+    return tasks.value.filter((t) => {
+      const priority = t.priority || 'normal';
+      const priorityLabel = priorityLabels[priority] ?? priority;
+      return (
+        t.title.toLowerCase().includes(term) ||
+        priority.toLowerCase().includes(term) ||
+        priorityLabel.toLowerCase().includes(term)
+      );
+    });
+  });
+
+  const filteredPendingTasks = computed(() =>
+    filteredTasks.value.filter((t) => !t.done),
+  );
+  const filteredCompletedTasks = computed(() =>
+    filteredTasks.value.filter((t) => t.done),
+  );
+
+  function groupByPriority(taskList) {
+    return priorityOrder
+      .map((priority) => ({
+        priority,
+        label: priorityLabels[priority],
+        tasks: taskList.filter((t) => (t.priority || 'normal') === priority),
+      }))
+      .filter((group) => group.tasks.length > 0);
+  }
+
+  const pendingGroups = computed(() => groupByPriority(filteredPendingTasks.value));
+  const completedGroups = computed(() =>
+    groupByPriority(filteredCompletedTasks.value),
+  );
 
   async function fetchTasks() {
     loading.value = true;
@@ -24,11 +64,23 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
-  async function addTask(payload) {
-    if (!payload.title?.trim()) return;
+  async function addTask({
+    title,
+    priority = 'normal',
+    imgAttachmentKey,
+    latitude,
+    longitude,
+  } = {}) {
+    if (!title?.trim()) return;
     error.value = null;
     try {
-      const response = await tasksApi.create(payload);
+      const response = await tasksApi.create(
+        title.trim(),
+        priority,
+        imgAttachmentKey,
+        latitude,
+        longitude,
+      );
       tasks.value.push(response.data);
     } catch (err) {
       error.value = 'Erro ao adicionar tarefa.';
@@ -61,12 +113,22 @@ export const useTasksStore = defineStore('tasks', () => {
     }
   }
 
-  async function updateTask(id, { title, imgAttachmentKey } = {}) {
+  async function updateTask(
+    id,
+    { title, imgAttachmentKey, removeImage = false, priority, latitude, longitude } = {},
+  ) {
     if (title !== undefined && !title.trim()) return;
     error.value = null;
     const payload = {};
     if (title !== undefined) payload.title = title.trim();
-    if (imgAttachmentKey != null) payload.img_attachment_key = imgAttachmentKey;
+    if (removeImage) {
+      payload.img_attachment_key = null;
+    } else if (imgAttachmentKey != null) {
+      payload.img_attachment_key = imgAttachmentKey;
+    }
+    if (priority !== undefined) payload.priority = priority;
+    if (latitude != null) payload.latitude = latitude;
+    if (longitude != null) payload.longitude = longitude;
     try {
       const response = await tasksApi.update(id, payload);
       const index = tasks.value.findIndex((t) => t.id === id);
@@ -81,8 +143,14 @@ export const useTasksStore = defineStore('tasks', () => {
     tasks,
     loading,
     error,
+    filterText,
     pendingTasks,
     completedTasks,
+    filteredTasks,
+    filteredPendingTasks,
+    filteredCompletedTasks,
+    pendingGroups,
+    completedGroups,
     fetchTasks,
     addTask,
     toggleTask,

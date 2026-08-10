@@ -1,6 +1,9 @@
 <template>
   <OfflineBanner />
-  <AppHeader />
+  <AppHeader
+    :notification-count="notificationCount"
+    @clear-notifications="notificationCount = 0"
+  />
   <main>
     <router-view />
   </main>
@@ -8,7 +11,7 @@
 </template>
 
 <script setup>
-import { onMounted, onUnmounted } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import AppHeader from './components/AppHeader.vue';
 import OfflineBanner from './components/OfflineBanner.vue';
 import NotificationPrompt from './components/NotificationPrompt.vue';
@@ -17,9 +20,11 @@ import { useAuthStore } from './stores/auth';
 
 const tasksStore = useTasksStore();
 const authStore = useAuthStore();
+const notificationCount = ref(0);
 
 function onSwMessage(event) {
   if (event.data?.type === 'PUSH_NOTIFICATION_CLICKED') {
+    notificationCount.value += 1;
     tasksStore.fetchTasks();
   }
 }

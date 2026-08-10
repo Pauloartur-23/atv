@@ -9,6 +9,16 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => !!accessToken.value);
 
+  const userEmail = computed(() => {
+    if (!accessToken.value) return null;
+    try {
+      const payload = JSON.parse(atob(accessToken.value.split('.')[1]));
+      return payload.sub ?? null;
+    } catch {
+      return null;
+    }
+  });
+
   const { requestPermission, subscribe, unsubscribe } =
     usePushNotifications();
 
@@ -42,6 +52,7 @@ export const useAuthStore = defineStore('auth', () => {
     accessToken,
     refreshToken,
     isAuthenticated,
+    userEmail,
     login,
     logout,
     requestPermission,

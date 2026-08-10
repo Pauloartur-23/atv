@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Offline - Gerenciador de Tarefas</title>
+    <style>
+      body {
+        font-family: 'Segoe UI', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 0;
+        background-color: #f5f5f5;
+        color: #333;
+        text-align: center;
+        padding: 20px;
+      }
+      .container {
+        max-width: 400px;
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin-bottom: 16px;
+        color: #4a90d9;
+      }
+      p {
+        line-height: 1.6;
+        color: #666;
+      }
+      button {
+        margin-top: 20px;
+        padding: 12px 24px;
+        background-color: #4a90d9;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Sem conexão</h1>
+      <p>
+        Você está offline e esta página não está disponível no cache.
+        Verifique sua conexão e tente novamente.
+      </p>
+      <button onclick="window.location.reload()">Tentar novamente</button>
+    </div>
+  </body>
+</html>
