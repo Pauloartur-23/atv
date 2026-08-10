@@ -84,108 +84,113 @@ async function handleLogin() {
 </script>
 
 <style scoped>
-.success-message {
-  color: #27ae60;
-  background-color: #eafaf1;
-  border: 1px solid #27ae60;
-  border-radius: 6px;
-  padding: 10px 14px;
-  margin-bottom: 12px;
-  font-size: 0.9rem;
-}
-
-.register-link {
-  margin-top: 16px;
-  text-align: center;
-  font-size: 0.875rem;
-  color: #666;
-}
-
-.register-link a {
-  color: #4a90d9;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.register-link a:hover {
-  text-decoration: underline;
-}
-
 .register-container {
   display: flex;
+  align-items: center;
   justify-content: center;
-  padding-top: 24px;
+  min-height: 70vh;
+  padding: 32px 0;
 }
 
 .register-form {
   width: 100%;
-  max-width: 400px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 24px;
+  max-width: 380px;
 }
 
 .register-form h1 {
-  font-size: 1.4rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
   color: #4a90d9;
-  margin-bottom: 20px;
+  margin-bottom: 22px;
+}
+
+.success-message {
+  color: #1e7f4f;
+  background-color: #eafaf1;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
 }
 
 .error-message {
-  color: #c0392b;
-  background-color: #fdecea;
-  border: 1px solid #e74c3c;
-  border-radius: 6px;
+  color: #d43d2a;
+  background-color: #fdf0ee;
+  border-radius: 8px;
   padding: 10px 14px;
-  margin-bottom: 12px;
-  font-size: 0.9rem;
+  margin-bottom: 16px;
+  font-size: 0.85rem;
 }
 
 .field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
 }
 
 .field label {
-  font-size: 0.875rem;
-  color: #555;
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #999;
+  margin-bottom: 8px;
 }
 
 .field input {
-  padding: 12px;
-  border: 2px solid #ddd;
-  border-radius: 8px;
-  font-size: 1rem;
+  width: 100%;
+  padding: 10px 0;
+  border: none;
+  border-bottom: 2px solid #ddd;
+  border-radius: 0;
+  background: transparent;
+  font-size: 0.95rem;
   outline: none;
   transition: border-color 0.2s;
 }
 
 .field input:focus {
-  border-color: #4a90d9;
+  border-bottom-color: #4a90d9;
 }
 
 button[type='submit'] {
   width: 100%;
   padding: 12px;
-  margin-top: 8px;
+  margin-top: 6px;
   background-color: #4a90d9;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.2s, transform 0.1s;
 }
 
 button[type='submit']:hover:not(:disabled) {
   background-color: #357abd;
 }
 
+button[type='submit']:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
 button[type='submit']:disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   cursor: not-allowed;
+}
+
+.register-link {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.register-link a {
+  color: #4a90d9;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 </style>
